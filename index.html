@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Apresentacao de uso: como funciona o DM automatico do Instagram no ManyChat e numa estrutura propria com n8n.">
+<style>
+  html { color-scheme: light dark; }
+  body { margin: 0; font-family: system-ui, sans-serif; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<title>ManyChat ou estrutura própria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --ground: #F7F9F8;
+    --surface: #FFFFFF;
+    --surface-2: #EFF3F2;
+    --ink: #0E1518;
+    --ink-2: #3B4A4F;
+    --ink-3: #6C7F85;
+    --line: #DCE4E3;
+    --line-strong: #B9C8C7;
+    --green: #07C42C;
+    --green-soft: #E4F8E8;
+    --green-ink: #06861F;
+    --teal: #4A8FAA;
+    --teal-soft: #E7F1F6;
+    --teal-2: #67B3D4;
+    --bar: #4A8FAA;
+    --bar-track: #EAEFEE;
+    --warn-soft: #FBF3E3;
+    --warn-line: #E8D3A6;
+    --warn-ink: #8A6416;
+
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0B1114;
+      --surface: #121A1E;
+      --surface-2: #182227;
+      --ink: #EAF1F0;
+      --ink-2: #B3C3C6;
+      --ink-3: #7E9298;
+      --line: #233035;
+      --line-strong: #3A4D53;
+      --green: #2ADA4C;
+      --green-soft: #13291A;
+      --green-ink: #58E274;
+      --teal: #67B3D4;
+      --teal-soft: #12242D;
+      --teal-2: #8CC9E3;
+      --bar: #67B3D4;
+      --bar-track: #1C262B;
+      --warn-soft: #241D0F;
+      --warn-line: #453820;
+      --warn-ink: #D9B563;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0B1114;
+    --surface: #121A1E;
+    --surface-2: #182227;
+    --ink: #EAF1F0;
+    --ink-2: #B3C3C6;
+    --ink-3: #7E9298;
+    --line: #233035;
+    --line-strong: #3A4D53;
+    --green: #2ADA4C;
+    --green-soft: #13291A;
+    --green-ink: #58E274;
+    --teal: #67B3D4;
+    --teal-soft: #12242D;
+    --teal-2: #8CC9E3;
+    --bar: #67B3D4;
+    --bar-track: #1C262B;
+    --warn-soft: #241D0F;
+    --warn-line: #453820;
+    --warn-ink: #D9B563;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 56px 24px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+  }
+
+  .measure { max-width: 63ch; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 5.4vw, 46px);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+
+  h2 {
+    font-size: clamp(21px, 3vw, 25px);
+    line-height: 1.22;
+    font-weight: 600;
+    letter-spacing: -0.014em;
+    text-wrap: balance;
+    margin: 0 0 12px;
+  }
+
+  p { margin: 0 0 14px; color: var(--ink-2); }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  .lead { font-size: 19px; line-height: 1.55; color: var(--ink-2); }
+  .sec-head { margin-bottom: 26px; }
+
+  /* ---------- figuras / svg ---------- */
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px 20px 18px;
+  }
+
+  .fig-scroll { overflow-x: auto; }
+
+  figure svg {
+    display: block;
+    width: 100%;
+    min-width: 560px;
+    height: auto;
+    color: var(--ink-2);
+    font-family: var(--mono);
+  }
+
+  figcaption {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-3);
+  }
+
+  .n-box { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.5; }
+  .n-box-key { fill: var(--green-soft); stroke: var(--green); stroke-width: 1.5; }
+  .n-box-end { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
+  .n-dia { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1.5; }
+
+  .t { fill: var(--ink); font-size: 13px; font-weight: 500; }
+  .t-sm { fill: var(--ink-2); font-size: 11.5px; font-weight: 400; }
+  .t-key { fill: var(--green-ink); font-size: 13px; font-weight: 700; }
+  .t-edge { fill: var(--ink-3); font-size: 11px; font-weight: 500; letter-spacing: 0.04em; }
+  .t-head { fill: var(--ink-3); font-size: 11.5px; font-weight: 700; letter-spacing: 0.12em; }
+  .t-head-key { fill: var(--green-ink); font-size: 11.5px; font-weight: 700; letter-spacing: 0.12em; }
+
+  .edge { stroke: var(--line-strong); stroke-width: 1.5; fill: none; }
+  .edge-key { stroke: var(--green); stroke-width: 1.8; fill: none; }
+  .edge-dash { stroke: var(--line-strong); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+
+  /* ---------- sequência de mensagens ---------- */
+  .seq {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .seq-row {
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 22px;
+    padding: 20px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .seq-row:last-child { border-bottom: 1px solid var(--line); }
+
+  .seq-when {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--teal);
+    padding-top: 4px;
+  }
+  .seq-when small {
+    display: block;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--ink-3);
+    margin-top: 3px;
+  }
+  .seq-row.cond .seq-when { color: var(--green-ink); }
+
+  .seq-body { display: flex; flex-direction: column; gap: 9px; }
+
+  .bubble {
+    font-size: 14.5px;
+    line-height: 1.45;
+    padding: 11px 14px;
+    border-radius: 16px;
+    max-width: 400px;
+  }
+  .bubble.them {
+    background: var(--surface-2);
+    color: var(--ink-2);
+    border-bottom-left-radius: 5px;
+    align-self: flex-start;
+  }
+  .bubble.you {
+    background: var(--teal);
+    color: #FFFFFF;
+    border-bottom-right-radius: 5px;
+  }
+  .bubble .lnk { color: #E2F0F7; text-decoration: underline; }
+  .seq-note { font-size: 13.5px; color: var(--ink-3); margin: 0; }
+
+  /* ---------- dashboard ---------- */
+  .dash {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .dash-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  .dash-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin: 0;
+  }
+  .dash-scope {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    margin: 0;
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    border-bottom: 1px solid var(--line);
+  }
+  .tile {
+    padding: 20px 22px;
+    border-right: 1px solid var(--line);
+  }
+  .tile:last-child { border-right: none; }
+  .tile-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 6px;
+  }
+  .tile-value {
+    font-family: var(--mono);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .tile-value.good { color: var(--green-ink); }
+  .tile-sub {
+    font-size: 13px;
+    color: var(--ink-3);
+    margin: 7px 0 0;
+  }
+
+  .chart { padding: 22px; }
+  .chart-head {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  .chart-sub { font-size: 13.5px; color: var(--ink-3); margin: 0 0 18px; }
+
+  .bars { display: flex; flex-direction: column; gap: 12px; }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 1fr 46px;
+    gap: 14px;
+    align-items: center;
+  }
+  .bar-label {
+    font-size: 14px;
+    color: var(--ink-2);
+    margin: 0 0 5px;
+    line-height: 1.3;
+  }
+  .bar-label .sold {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--warn-ink);
+    background: var(--warn-soft);
+    border: 1px solid var(--warn-line);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-left: 7px;
+    vertical-align: 1px;
+  }
+  .bar-track {
+    background: var(--bar-track);
+    border-radius: 0 4px 4px 0;
+    height: 12px;
+  }
+  .bar-fill {
+    background: var(--bar);
+    height: 12px;
+    border-radius: 0 4px 4px 0;
+    transition: opacity .15s ease;
+  }
+  .bar-row:hover .bar-fill { opacity: .78; }
+  .bar-count {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    align-self: end;
+    line-height: 1;
+    padding-bottom: 1px;
+  }
+
+  .dash-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ---------- listas de pontos ---------- */
+  .points { display: flex; flex-direction: column; gap: 0; }
+  .point {
+    display: grid;
+    grid-template-columns: 132px 1fr;
+    gap: 24px;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .point:last-child { border-bottom: 1px solid var(--line); }
+  .point-label {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal);
+    padding-top: 3px;
+  }
+  .point p { font-size: 16px; margin: 0; }
+
+  /* ---------- longo prazo ---------- */
+  .panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px;
+  }
+  .panel.accent { background: var(--green-soft); border-color: transparent; }
+  .panel-metric {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+    color: var(--ink-3);
+  }
+  .panel.accent .panel-metric { color: var(--green-ink); }
+  .panel p { font-size: 15.5px; margin: 0; }
+
+  /* ---------- nota ---------- */
+  .note {
+    background: var(--warn-soft);
+    border: 1px solid var(--warn-line);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .note .eyebrow { color: var(--warn-ink); }
+  .note h2 { font-size: 20px; }
+  .note ul {
+    margin: 14px 0 0;
+    padding: 0 0 0 18px;
+    color: var(--ink-2);
+    font-size: 15.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 560px) {
+    body { font-size: 16px; }
+    .page { padding: 40px 18px 56px; gap: 52px; }
+    .point, .seq-row { grid-template-columns: 1fr; gap: 6px; }
+    .point-label, .seq-when { padding-top: 0; }
+    .seq-body { margin-top: 8px; }
+    .tile { border-right: none; border-bottom: 1px solid var(--line); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header>
+    <p class="eyebrow">V3 Nexus · Apresentação de uso</p>
+    <h1>O mesmo DM automático, sem pagar por contato</h1>
+    <p class="lead measure">Patrícia, isto não é uma proposta. É pra você ver desenhado o que
+      acontece por trás quando alguém comenta no seu reel, quais caminhos dá pra criar, e o que
+      você passaria a enxergar depois que a mensagem sai.</p>
+  </header>
+
+  <!-- ============ 1. OS DOIS MOTORES ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>Os dois motores, lado a lado</h2>
+      <p class="measure">Pra sua seguidora nada muda: ela comenta e recebe os links. A diferença
+        está nas duas caixas que só existem do lado direito, o <strong>catálogo</strong> de onde
+        os links saem e o <strong>banco</strong> onde fica registrado quem pediu.</p>
+    </div>
+
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 760 400" role="img" preserveAspectRatio="xMidYMin meet"
+             aria-label="Comparação dos dois motores: no ManyChat o texto e os contatos ficam dentro da própria ferramenta; na estrutura própria o n8n consulta um catálogo de links editável e grava os contatos num banco de dados seu.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+            </marker>
+            <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--green)"></path>
+            </marker>
+          </defs>
+
+          <!-- divisor -->
+          <line x1="380" y1="10" x2="380" y2="390" class="edge-dash"></line>
+
+          <!-- ===== lado esquerdo: ManyChat ===== -->
+          <text x="30" y="26" class="t-head">HOJE · MANYCHAT</text>
+
+          <rect x="30" y="46" width="300" height="42" rx="7" class="n-box"></rect>
+          <text x="180" y="72" class="t" text-anchor="middle">Comentário no reel</text>
+
+          <line x1="180" y1="88" x2="180" y2="128" class="edge" marker-end="url(#ah)"></line>
+
+          <rect x="30" y="132" width="300" height="66" rx="7" class="n-box"></rect>
+          <text x="180" y="158" class="t" text-anchor="middle">ManyChat</text>
+          <text x="180" y="178" class="t-sm" text-anchor="middle">o texto dos links mora aqui dentro</text>
+
+          <line x1="180" y1="198" x2="180" y2="238" class="edge" marker-end="url(#ah)"></line>
+          <text x="190" y="222" class="t-edge">envia</text>
+
+          <rect x="30" y="242" width="300" height="42" rx="7" class="n-box"></rect>
+          <text x="180" y="268" class="t" text-anchor="middle">Direct da seguidora</text>
+
+          <line x1="180" y1="284" x2="180" y2="318" class="edge" marker-end="url(#ah)"></line>
+
+          <rect x="30" y="322" width="300" height="52" rx="7" class="n-box-end"></rect>
+          <text x="180" y="344" class="t" text-anchor="middle">Contato salvo no ManyChat</text>
+          <text x="180" y="363" class="t-sm" text-anchor="middle">e cobrado na sua fatura</text>
+
+          <!-- ===== lado direito: estrutura própria ===== -->
+          <text x="430" y="26" class="t-head-key">ESTRUTURA PRÓPRIA · N8N</text>
+
+          <rect x="430" y="46" width="300" height="42" rx="7" class="n-box"></rect>
+          <text x="580" y="72" class="t" text-anchor="middle">Comentário no reel</text>
+
+          <line x1="580" y1="88" x2="580" y2="128" class="edge" marker-end="url(#ah)"></line>
+
+          <rect x="430" y="132" width="180" height="66" rx="7" class="n-box"></rect>
+          <text x="520" y="158" class="t" text-anchor="middle">n8n</text>
+          <text x="520" y="178" class="t-sm" text-anchor="middle">monta a mensagem</text>
+
+          <rect x="628" y="132" width="102" height="66" rx="7" class="n-box-key"></rect>
+          <text x="679" y="156" class="t-key" text-anchor="middle">Catálogo</text>
+          <text x="679" y="174" class="t-sm" text-anchor="middle">seus links</text>
+
+          <line x1="628" y1="165" x2="614" y2="165" class="edge-key" marker-end="url(#ahg)"></line>
+
+          <line x1="520" y1="198" x2="520" y2="238" class="edge" marker-end="url(#ah)"></line>
+          <text x="530" y="222" class="t-edge">envia</text>
+
+          <rect x="430" y="242" width="300" height="42" rx="7" class="n-box"></rect>
+          <text x="580" y="268" class="t" text-anchor="middle">Direct da seguidora</text>
+
+          <line x1="580" y1="284" x2="580" y2="318" class="edge" marker-end="url(#ah)"></line>
+
+          <rect x="430" y="322" width="300" height="52" rx="7" class="n-box-key"></rect>
+          <text x="580" y="344" class="t-key" text-anchor="middle">Contato salvo no seu banco</text>
+          <text x="580" y="363" class="t-sm" text-anchor="middle">sem limite e sem cobrança por contato</text>
+        </svg>
+      </div>
+      <figcaption>As duas caixas verdes são a diferença inteira. O catálogo deixa você trocar um
+        cupom sem abrir automação nenhuma. O banco mantém a lista de quem pediu com você.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ 2. VARIAÇÕES DE CAMINHO ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>Um fluxo, vários caminhos</h2>
+      <p class="measure">Aqui está o que dá pra montar. A automação lê a palavra que a pessoa
+        comentou e decide sozinha qual lista mandar, e depois volta a agir dependendo de a pessoa
+        ter clicado ou não.</p>
+    </div>
+
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 760 690" role="img" preserveAspectRatio="xMidYMin meet"
+             aria-label="Fluxo com bifurcações: o comentário é lido, a palavra define qual catálogo responde, a sequência de mensagens é enviada, e o clique no link decide se entra um lembrete no dia seguinte.">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+            </marker>
+            <marker id="ahg2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--green)"></path>
+            </marker>
+          </defs>
+
+          <!-- entrada -->
+          <rect x="290" y="14" width="200" height="42" rx="7" class="n-box"></rect>
+          <text x="390" y="40" class="t" text-anchor="middle">Comentário no reel</text>
+          <line x1="390" y1="56" x2="390" y2="82" class="edge" marker-end="url(#ah2)"></line>
+
+          <!-- decisão 1 -->
+          <polygon points="390,86 510,124 390,162 270,124" class="n-dia"></polygon>
+          <text x="390" y="121" class="t" text-anchor="middle">Qual palavra</text>
+          <text x="390" y="138" class="t" text-anchor="middle">ela comentou</text>
+
+          <!-- ramos horizontais -->
+          <path d="M 270 124 L 150 124 L 150 190" class="edge" marker-end="url(#ah2)"></path>
+          <text x="158" y="116" class="t-edge">"links"</text>
+
+          <path d="M 390 162 L 390 190" class="edge" marker-end="url(#ah2)"></path>
+          <text x="398" y="182" class="t-edge">"cupom"</text>
+
+          <path d="M 510 124 L 640 124 L 640 190" class="edge-dash" marker-end="url(#ah2)"></path>
+          <text x="560" y="116" class="t-edge">qualquer outra</text>
+
+          <!-- catálogos -->
+          <rect x="50" y="194" width="200" height="56" rx="7" class="n-box-key"></rect>
+          <text x="150" y="218" class="t-key" text-anchor="middle">Catálogo do reel</text>
+          <text x="150" y="236" class="t-sm" text-anchor="middle">os produtos daquele vídeo</text>
+
+          <rect x="290" y="194" width="200" height="56" rx="7" class="n-box-key"></rect>
+          <text x="390" y="218" class="t-key" text-anchor="middle">Catálogo de cupons</text>
+          <text x="390" y="236" class="t-sm" text-anchor="middle">as marcas parceiras ativas</text>
+
+          <rect x="540" y="194" width="200" height="56" rx="7" class="n-box-end"></rect>
+          <text x="640" y="218" class="t" text-anchor="middle">Resposta padrão</text>
+          <text x="640" y="236" class="t-sm" text-anchor="middle">e o fluxo para aqui</text>
+
+          <!-- convergência -->
+          <path d="M 150 250 L 150 288 L 390 288" class="edge"></path>
+          <path d="M 390 250 L 390 300" class="edge" marker-end="url(#ah2)"></path>
+
+          <!-- mensagem 1 -->
+          <rect x="240" y="304" width="300" height="56" rx="7" class="n-box"></rect>
+          <text x="390" y="328" class="t" text-anchor="middle">Mensagem 1: confirmação</text>
+          <text x="390" y="346" class="t-sm" text-anchor="middle">na hora, com o botão de liberar</text>
+
+          <line x1="390" y1="360" x2="390" y2="396" class="edge" marker-end="url(#ah2)"></line>
+          <text x="400" y="382" class="t-edge">2 segundos depois</text>
+
+          <!-- mensagem 2 -->
+          <rect x="240" y="400" width="300" height="56" rx="7" class="n-box"></rect>
+          <text x="390" y="424" class="t" text-anchor="middle">Mensagem 2: a lista de links</text>
+          <text x="390" y="442" class="t-sm" text-anchor="middle">texto puro, sem limite de 3 botões</text>
+
+          <line x1="390" y1="456" x2="390" y2="486" class="edge" marker-end="url(#ah2)"></line>
+
+          <!-- decisão 2 -->
+          <polygon points="390,490 520,528 390,566 260,528" class="n-dia"></polygon>
+          <text x="390" y="525" class="t" text-anchor="middle">Clicou em</text>
+          <text x="390" y="542" class="t" text-anchor="middle">algum link</text>
+
+          <!-- saídas -->
+          <path d="M 520 528 L 620 528 L 620 594" class="edge-key" marker-end="url(#ahg2)"></path>
+          <text x="530" y="520" class="t-edge">sim</text>
+
+          <path d="M 260 528 L 150 528 L 150 594" class="edge" marker-end="url(#ah2)"></path>
+          <text x="158" y="520" class="t-edge">não</text>
+
+          <rect x="500" y="598" width="240" height="56" rx="7" class="n-box-key"></rect>
+          <text x="620" y="622" class="t-key" text-anchor="middle">Registra no painel</text>
+          <text x="620" y="640" class="t-sm" text-anchor="middle">qual produto, qual reel</text>
+
+          <rect x="30" y="598" width="240" height="56" rx="7" class="n-box"></rect>
+          <text x="150" y="622" class="t" text-anchor="middle">Lembrete no dia seguinte</text>
+          <text x="150" y="640" class="t-sm" text-anchor="middle">só pra quem não clicou</text>
+        </svg>
+      </div>
+      <figcaption>Cada bifurcação é uma regra sua, não código. Dá pra ter uma palavra por reel, por
+        campanha ou por marca parceira, cada uma puxando um catálogo diferente.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ 3. SEQUÊNCIA ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>A sequência de mensagens</h2>
+      <p class="measure">Não precisa ser uma mensagem só. A sequência abaixo é um exemplo montado
+        com três, e cada uma pode entrar, sair ou mudar de horário sem mexer no resto.</p>
+    </div>
+
+    <div class="seq">
+      <div class="seq-row">
+        <p class="seq-when">Msg 1<small>na hora</small></p>
+        <div class="seq-body">
+          <div class="bubble them">links</div>
+          <div class="bubble you">Oii! Vi que você pediu os links do último post. Já te mando aqui,
+            e me segue pra não perder as próximas.</div>
+          <p class="seq-note">Responde na hora enquanto ela ainda está no reel. É essa resposta
+            imediata que a Meta permite dar a quem comentou.</p>
+        </div>
+      </div>
+
+      <div class="seq-row">
+        <p class="seq-when">Msg 2<small>2 segundos depois</small></p>
+        <div class="seq-body">
+          <div class="bubble you">Sapatilha preta: <span class="lnk">arezzo.com.br/...</span><br>
+            Lenço estampado: <span class="lnk">minhacea.com.br/...</span><br>
+            Jaqueta marrom: <span class="lnk">shein.com/...</span><br>
+            Cupom da C&amp;A: <span class="lnk">ZZCUPOM300</span></div>
+          <p class="seq-note">A lista sai do catálogo, então é sempre a versão de hoje. Produto
+            esgotado não aparece.</p>
+        </div>
+      </div>
+
+      <div class="seq-row cond">
+        <p class="seq-when">Msg 3<small>só se não clicou</small></p>
+        <div class="seq-body">
+          <div class="bubble you">Passando pra avisar que o cupom da jaqueta vence amanhã, caso
+            ainda queira.</div>
+          <p class="seq-note">Essa é condicional. Quem já clicou não recebe, então você não fica
+            insistindo com quem já comprou.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. PAINEL ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>O painel de cliques</h2>
+      <p class="measure">Isso o ManyChat não te dá: o link de afiliado vai direto pra loja, então
+        ninguém conta o clique. Numa estrutura própria o link passa por um endereço seu antes de
+        seguir pra loja, e é aí que o clique é contado. Pra sua seguidora é invisível.</p>
+    </div>
+
+    <div class="dash">
+      <div class="dash-bar">
+        <p class="dash-title">Painel de links</p>
+        <p class="dash-scope">Reel "Looks de outono" · últimos 7 dias</p>
+      </div>
+
+      <div class="tiles">
+        <div class="tile">
+          <p class="tile-label">Pediram os links</p>
+          <p class="tile-value">312</p>
+          <p class="tile-sub">comentários respondidos</p>
+        </div>
+        <div class="tile">
+          <p class="tile-label">Clicaram</p>
+          <p class="tile-value">198</p>
+          <p class="tile-sub">pessoas diferentes</p>
+        </div>
+        <div class="tile">
+          <p class="tile-label">Taxa de clique</p>
+          <p class="tile-value good">63%</p>
+          <p class="tile-sub">114 não clicaram e receberam o lembrete</p>
+        </div>
+      </div>
+
+      <div class="chart">
+        <p class="chart-head">Cliques por produto</p>
+        <p class="chart-sub">O número que a marca parceira pede quando você vai renegociar.</p>
+
+        <div class="bars">
+          <div class="bar-row">
+            <div>
+              <p class="bar-label">Jaqueta marrom · Shein</p>
+              <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+            </div>
+            <p class="bar-count">87</p>
+          </div>
+          <div class="bar-row">
+            <div>
+              <p class="bar-label">Sapatilha preta · Arezzo</p>
+              <div class="bar-track"><div class="bar-fill" style="width:70%"></div></div>
+            </div>
+            <p class="bar-count">61</p>
+          </div>
+          <div class="bar-row">
+            <div>
+              <p class="bar-label">Cupom C&amp;A</p>
+              <div class="bar-track"><div class="bar-fill" style="width:52%"></div></div>
+            </div>
+            <p class="bar-count">45</p>
+          </div>
+          <div class="bar-row">
+            <div>
+              <p class="bar-label">Lenço estampado · C&amp;A</p>
+              <div class="bar-track"><div class="bar-fill" style="width:37%"></div></div>
+            </div>
+            <p class="bar-count">32</p>
+          </div>
+          <div class="bar-row">
+            <div>
+              <p class="bar-label">Calça marrom · C&amp;A</p>
+              <div class="bar-track"><div class="bar-fill" style="width:22%"></div></div>
+            </div>
+            <p class="bar-count">19</p>
+          </div>
+          <div class="bar-row">
+            <div>
+              <p class="bar-label">Sapatilha palha · Renner <span class="sold">esgotado</span></p>
+              <div class="bar-track"><div class="bar-fill" style="width:5%"></div></div>
+            </div>
+            <p class="bar-count">4</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="dash-foot">Números de exemplo, só pra ilustrar a tela</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. O QUE TRAVA HOJE ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>O que trava hoje</h2>
+    </div>
+    <div class="points">
+      <div class="point">
+        <p class="point-label">3 botões</p>
+        <p>Esse teto é regra da Meta pra mensagem com botão, não do ManyChat. A saída é mandar a
+          lista como <strong>texto puro</strong>, que não tem limite de links. Funciona nos dois
+          motores, e é o que você já viu nos perfis que copiou.</p>
+      </div>
+      <div class="point">
+        <p class="point-label">Links no fluxo</p>
+        <p>Hoje os links moram dentro da automação. Cupom vencido ou produto esgotado significa
+          abrir o editor, achar o bloco certo e editar na mão. Toda vez, em cada fluxo.</p>
+      </div>
+      <div class="point">
+        <p class="point-label">Clique invisível</p>
+        <p>Você sabe quantas pessoas pediram, mas não quantas clicaram nem em quê. Na hora de
+          negociar com a marca, esse é justamente o número que falta.</p>
+      </div>
+      <div class="point">
+        <p class="point-label">Preço por contato</p>
+        <p>O ManyChat cobra por contato ativo. Com 143 mil seguidores, quanto melhor o reel
+          performa, mais cara fica a conta. Você paga pelo próprio alcance.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. LONGO PRAZO ============ -->
+  <section>
+    <div class="sec-head">
+      <h2>No longo prazo</h2>
+      <p class="measure">A diferença não é o preço de hoje. É a direção da curva.</p>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <p class="panel-metric">ManyChat</p>
+        <p>Custo sobe por faixa de contato. Cada reel que viraliza empurra você pra faixa seguinte,
+          e a conta acompanha o crescimento do perfil pra sempre.</p>
+      </div>
+      <div class="panel accent">
+        <p class="panel-metric">Estrutura própria</p>
+        <p>Custo fixo de servidor por mês, independente de quantas pessoas comentam. Dez mil
+          pedidos custam o mesmo que cem.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. TRANSPARÊNCIA ============ -->
+  <div class="note">
+    <p class="eyebrow">Transparência</p>
+    <h2>O que essa estrutura exige</h2>
+    <p class="measure">Pra você decidir com a informação toda, e não descobrir depois:</p>
+    <ul>
+      <li>Um aplicativo próprio no Meta for Developers, com aprovação da Meta pra ler comentários e
+        enviar direct. Esse é o passo mais lento, e é exatamente o que o ManyChat já tem pronto e
+        cobra por isso.</li>
+      <li>Um servidor rodando o n8n, com custo mensal fixo e baixo.</li>
+      <li>Um endereço próprio pros links passarem antes de ir pra loja. É o que permite contar
+        clique, e não muda nada pra quem recebe.</li>
+      <li>A conta profissional do Instagram conectada, igual você já faz hoje.</li>
+      <li>Depois de no ar, você não mexe em código. Só no catálogo de links.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <span>V3 Nexus · Automações e sistemas</span>
+    <span>Instagram API · n8n · Postgres</span>
+  </footer>
+
+</div>
+
+</body>
+</html>
